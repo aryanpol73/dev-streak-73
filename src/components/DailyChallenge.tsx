@@ -53,6 +53,33 @@ export function DailyChallenge({ onSubmit }: Props) {
   const completedToday = todaySubs.some(s => s.challengeId === challenge.topic.id);
   const charsLeft = 80 - proofNotes.trim().length;
 
+  const handleFiles = async (files: FileList | null) => {
+    if (!files) return;
+    const MAX = 3 * 1024 * 1024; // 3MB per file (localStorage limit)
+    const next: SubmissionAttachment[] = [];
+    for (const file of Array.from(files)) {
+      if (file.size > MAX) {
+        toast.error(`${file.name} too large (max 3MB)`);
+        continue;
+      }
+      const dataUrl = await new Promise<string>((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const kind: SubmissionAttachment['kind'] =
+        file.type.startsWith('image/') ? 'image' :
+        /\.(ts|tsx|js|jsx|py|java|cpp|c|go|rs|md|json|sql|html|css)$/i.test(file.name) ? 'code' : 'file';
+      next.push({
+        id: crypto.randomUUID?.() ?? Math.random().toString(36),
+        name: file.name, type: file.type, size: file.size, dataUrl, kind,
+      });
+    }
+    setAttachments(prev => [...prev, ...next].slice(0, 5)); // max 5
+    if (next.length) toast.success(`Attached ${next.length} file(s)`);
+  };
+
   return (
     <div className="glass-card overflow-hidden">
       <div className="p-6 border-b border-border/40 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
@@ -157,6 +184,53 @@ export function DailyChallenge({ onSubmit }: Props) {
             <textarea value={proofNotes} onChange={e => setProofNotes(e.target.value)} rows={4}
               placeholder="Built the JWT refresh token endpoint. Tested with Postman. Stored refresh tokens in MySQL with expiry. Handled rotation on refresh. Committed to feat/jwt branch."
               className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary/60 resize-none" required />
+          </div>
+
+          {/* Attachments */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><Paperclip className="w-3 h-3" /> Attachments (optional · screenshots, code, docs)</span>
+              <span className="font-mono">{attachments.length}/5</span>
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf,.txt,.md,.json,.ts,.tsx,.js,.jsx,.py,.sql,.html,.css,.java,.cpp,.go,.rs"
+              onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={attachments.length >= 5}
+              className="w-full py-2.5 border border-dashed border-border rounded-lg text-xs text-muted-foreground hover:border-primary hover:text-primary transition flex items-center justify-center gap-2 disabled:opacity-40"
+            >
+              <Paperclip className="w-3.5 h-3.5" /> Attach screenshot, file or VS Code snippet
+            </button>
+            {attachments.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                {attachments.map(a => (
+                  <div key={a.id} className="relative group rounded-md border border-border/50 bg-muted/20 overflow-hidden">
+                    {a.kind === 'image' ? (
+                      <img src={a.dataUrl} alt={a.name} className="w-full h-20 object-cover" />
+                    ) : (
+                      <div className="h-20 flex flex-col items-center justify-center p-2 text-center">
+                        {a.kind === 'code' ? <Code2 className="w-5 h-5 text-primary" /> : <FileText className="w-5 h-5 text-muted-foreground" />}
+                        <span className="text-[9px] font-mono text-muted-foreground truncate w-full mt-1">{a.name}</span>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setAttachments(p => p.filter(x => x.id !== a.id))}
+                      className="absolute top-1 right-1 p-0.5 rounded bg-background/80 text-destructive opacity-0 group-hover:opacity-100 transition"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">

@@ -1,12 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { ShieldCheck, ShieldAlert, GitBranch as Github, Link2, FileText, Code2, Clock } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, GitBranch as Github, Link2, FileText, Code2, Clock, Paperclip, X } from 'lucide-react';
 import { getSubmissions } from '@/lib/store';
 
 const ICONS = { commit: Github, deploy: Link2, leetcode: Code2, notes: FileText };
 
 export function SubmissionFeed({ refreshKey }: { refreshKey: number }) {
   const subs = useMemo(() => getSubmissions().slice(-15).reverse(), [refreshKey]);
+  const [preview, setPreview] = useState<{ src: string; name: string } | null>(null);
 
   return (
     <div className="glass-card p-6 space-y-3">
@@ -37,6 +38,9 @@ export function SubmissionFeed({ refreshKey }: { refreshKey: number }) {
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{s.minutesStudied}min</span>
                       <span>P{s.phaseNumber}</span>
                       {s.leetcodeProblems > 0 && <span className="text-primary">+{s.leetcodeProblems} LC</span>}
+                      {s.attachments && s.attachments.length > 0 && (
+                        <span className="flex items-center gap-1 text-primary"><Paperclip className="w-3 h-3" />{s.attachments.length}</span>
+                      )}
                     </div>
                     <p className="text-xs text-foreground/70 mt-1 line-clamp-2">{s.proofNotes}</p>
                     {s.proofUrl && (
@@ -45,11 +49,34 @@ export function SubmissionFeed({ refreshKey }: { refreshKey: number }) {
                         {s.proofUrl}
                       </a>
                     )}
+                    {s.attachments && s.attachments.length > 0 && (
+                      <div className="flex gap-1.5 mt-2 flex-wrap">
+                        {s.attachments.map(a => (
+                          a.kind === 'image' ? (
+                            <button key={a.id} type="button" onClick={() => setPreview({ src: a.dataUrl, name: a.name })}>
+                              <img src={a.dataUrl} alt={a.name} className="w-12 h-12 object-cover rounded border border-border hover:border-primary transition" />
+                            </button>
+                          ) : (
+                            <a key={a.id} href={a.dataUrl} download={a.name}
+                              className="flex items-center gap-1 px-2 py-1 rounded border border-border bg-muted/30 text-[10px] font-mono hover:border-primary hover:text-primary transition">
+                              {a.kind === 'code' ? <Code2 className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                              <span className="truncate max-w-[100px]">{a.name}</span>
+                            </a>
+                          )
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+      {preview && (
+        <div onClick={() => setPreview(null)} className="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-6">
+          <button className="absolute top-4 right-4 p-2 rounded-lg bg-muted hover:bg-muted/70"><X className="w-5 h-5" /></button>
+          <img src={preview.src} alt={preview.name} className="max-w-full max-h-full rounded-lg border border-primary/40" onClick={e => e.stopPropagation()} />
         </div>
       )}
     </div>

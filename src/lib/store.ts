@@ -53,6 +53,16 @@ export interface DailySubmission {
   difficulty: 'easy' | 'medium' | 'hard';
   verified: boolean;       // basic heuristic check
   createdAt: string;
+  attachments?: SubmissionAttachment[]; // images / files / vscode pastes
+}
+
+export interface SubmissionAttachment {
+  id: string;
+  name: string;
+  type: string;       // mime type
+  size: number;       // bytes
+  dataUrl: string;    // base64 data: URL — stored locally
+  kind: 'image' | 'file' | 'code';
 }
 
 export interface WeeklyReflection {
@@ -392,19 +402,6 @@ const ROADMAP_PHASES: Phase[] = [
     ],
     projects: [],
   },
-  {
-    id: 'p7', number: 7, name: 'Ongoing: Build in Public',
-    weekStart: 1, weekEnd: 48, color: '328 90% 60%',
-    focus: 'Run continuously alongside all phases. Compound your credibility.',
-    outcome: 'Personal brand growing. LinkedIn, GitHub, Blog active.',
-    sections: [
-      { title: 'Continuous Habits', topics: [
-        t('Daily GitHub commit'), t('Weekly LinkedIn post'),
-        t('Monthly blog/newsletter'), t('Quarterly project showcase'),
-      ]},
-    ],
-    projects: [],
-  },
 ];
 
 // =============================================================================
@@ -431,8 +428,8 @@ function save(key: string, data: unknown) { localStorage.setItem(key, JSON.strin
 
 export function getPhases(): Phase[] {
   const stored = load<Phase[] | null>(KEYS.phases, null);
-  // Migration: if user has old data, reset to roadmap
-  if (!stored || !Array.isArray(stored) || stored.length !== ROADMAP_PHASES.length || !stored[0]?.sections) {
+  // Migration: if user has old data (or old P7 ongoing), reset to roadmap
+  if (!stored || !Array.isArray(stored) || stored.length !== ROADMAP_PHASES.length || !stored[0]?.sections || stored.some((p: Phase) => p.number === 7)) {
     save(KEYS.phases, ROADMAP_PHASES);
     return ROADMAP_PHASES;
   }
@@ -497,13 +494,12 @@ export function getOverallProgress(): number {
 
 export function getActivePhase(): Phase {
   const phases = getPhases();
-  // Active = first phase that's not 100% complete (skip ongoing phase 7)
+  // Active = first phase that's not 100% complete
   for (const p of phases) {
-    if (p.number === 7) continue;
     const prog = getPhaseProgress(p);
     if (prog.pct < 100) return p;
   }
-  return phases[phases.length - 2]; // fallback to phase 6
+  return phases[phases.length - 1]; // fallback to last phase
 }
 
 // =============================================================================
@@ -541,12 +537,15 @@ export function addSubmission(s: Omit<DailySubmission, 'id' | 'verified' | 'crea
   if (!s.proofNotes || s.proofNotes.trim().length < 80) {
     return { ok: false, error: 'Proof notes must be at least 80 characters. Describe what you actually did.' };
   }
-  if (s.proofType !== 'notes' && s.proofType !== 'leetcode' && (!s.proofUrl || !/^https?:\/\//.test(s.proofUrl))) {
-    return { ok: false, error: 'A valid proof URL (https://...) is required for commit/deploy submissions.' };
+  const hasAttachments = (s.attachments?.length ?? 0) > 0;
+  if (s.proofType !== 'notes' && s.proofType !== 'leetcode' && !hasAttachments && (!s.proofUrl || !/^https?:\/\//.test(s.proofUrl))) {
+    return { ok: false, error: 'A valid proof URL or an attached file is required for commit/deploy submissions.' };
   }
 
   // Heuristic verification
-  const verified = s.proofType === 'commit'
+  const verified = hasAttachments
+    ? true
+    : s.proofType === 'commit'
     ? /github\.com|gitlab\.com|bitbucket\.org/i.test(s.proofUrl || '')
     : s.proofType === 'deploy'
       ? /https?:\/\//.test(s.proofUrl || '')
@@ -654,7 +653,7 @@ export function getRoadmapAlignment() {
   if (!start) return null;
   const days = differenceInCalendarDays(new Date(), parseISO(start));
   const week = Math.floor(days / 7) + 1;
-  const phases = getPhases().filter(p => p.number !== 7);
+  const phases = getPhases();
 
   let expectedPhase = phases[0];
   for (const p of phases) {
@@ -667,6 +666,21 @@ export function getRoadmapAlignment() {
   const actualPct = getOverallProgress();
   const behindPct = expectedPct - actualPct;
 
+  // Prediction: at current pace, when will you finish?
+  // Pace = actualPct / daysSinceStart (only meaningful after a few days)
+  let predictedFinishDays: number | null = null;
+  let predictedFinishMonths: number | null = null;
+  let delayDays: number | null = null;
+  if (days >= 3 && actualPct > 0) {
+    const pacePctPerDay = actualPct / days;
+    const remainingPct = 100 - actualPct;
+    predictedFinishDays = Math.round(remainingPct / pacePctPerDay);
+    predictedFinishMonths = Math.round((predictedFinishDays / 30) * 10) / 10;
+    const targetDays = totalWeeks * 7; // 336 days
+    const totalProjectedDays = days + predictedFinishDays;
+    delayDays = totalProjectedDays - targetDays;
+  }
+
   return {
     daysSinceStart: days,
     currentWeek: week,
@@ -676,6 +690,9 @@ export function getRoadmapAlignment() {
     actualPct,
     behindPct,
     onTrack: behindPct <= 5,
+    predictedFinishDays,
+    predictedFinishMonths,
+    delayDays,
   };
 }
 

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Lock, CheckCircle2, AlertCircle, GitBranch as Github, Link2, FileText, Code2 } from 'lucide-react';
-import { getTodayChallenge, addSubmission, getTodaySubmissions, type DailySubmission } from '@/lib/store';
+import { Target, Lock, CheckCircle2, GitBranch as Github, Link2, FileText, Code2, Paperclip, X, Image as ImageIcon } from 'lucide-react';
+import { getTodayChallenge, addSubmission, getTodaySubmissions, type DailySubmission, type SubmissionAttachment } from '@/lib/store';
 import { toast } from 'sonner';
 
 interface Props { onSubmit: () => void; }
@@ -16,6 +16,8 @@ export function DailyChallenge({ onSubmit }: Props) {
   const [minutes, setMinutes] = useState(60);
   const [leetcode, setLeetcode] = useState(0);
   const [difficulty, setDifficulty] = useState<DailySubmission['difficulty']>('medium');
+  const [attachments, setAttachments] = useState<SubmissionAttachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!challenge) {
     return (
@@ -40,10 +42,11 @@ export function DailyChallenge({ onSubmit }: Props) {
       proofNotes,
       leetcodeProblems: leetcode,
       difficulty,
+      attachments: attachments.length ? attachments : undefined,
     });
     if (!result.ok) { toast.error(result.error || 'Submission rejected'); return; }
     toast.success(result.submission?.verified ? '✅ Verified submission' : '📝 Submitted (low proof)');
-    setOpen(false); setProofUrl(''); setProofNotes(''); setMinutes(60); setLeetcode(0);
+    setOpen(false); setProofUrl(''); setProofNotes(''); setMinutes(60); setLeetcode(0); setAttachments([]);
     onSubmit();
   };
 

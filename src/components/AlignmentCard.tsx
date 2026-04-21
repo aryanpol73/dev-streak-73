@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, TrendingDown, Target } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Target, Clock, Zap } from 'lucide-react';
 import { getRoadmapAlignment, setStartDate, getStartDate, getWeeklyStats, getTotalLeetcode } from '@/lib/store';
 
 export function AlignmentCard({ refreshKey }: { refreshKey: number }) {
@@ -70,6 +70,32 @@ export function AlignmentCard({ refreshKey }: { refreshKey: number }) {
                `⚠ ${align.behindPct}% behind schedule`}
             </p>
           </div>
+
+          {/* Prediction */}
+          {align.predictedFinishMonths !== null && (
+            <div className="rounded-lg border border-border/50 bg-muted/10 p-3 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-mono text-muted-foreground">
+                <Zap className="w-3 h-3" /> Pace Prediction
+              </div>
+              <p className="text-sm text-foreground leading-snug">
+                At current pace, you'll finish in <span className="font-display font-bold text-primary">{align.predictedFinishMonths}</span> months
+                <span className="text-muted-foreground"> (~{align.predictedFinishDays} days)</span>.
+              </p>
+              {align.delayDays !== null && (
+                <p className={`text-[11px] font-mono ${align.delayDays > 14 ? 'text-destructive' : align.delayDays > 0 ? 'text-warning' : 'text-primary'}`}>
+                  <Clock className="w-3 h-3 inline -mt-0.5" />{' '}
+                  {align.delayDays > 0
+                    ? `${align.delayDays} days behind 14-month target`
+                    : align.delayDays < 0
+                      ? `${Math.abs(align.delayDays)} days ahead of target`
+                      : 'Right on the 14-month target'}
+                </p>
+              )}
+            </div>
+          )}
+          {align.predictedFinishMonths === null && (
+            <p className="text-[11px] text-muted-foreground font-mono italic">Log a few more days to unlock pace prediction.</p>
+          )}
         </>
       )}
 

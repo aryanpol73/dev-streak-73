@@ -10,6 +10,7 @@ import { StatusStrip } from '@/components/StatusStrip';
 import { AlignmentCard } from '@/components/AlignmentCard';
 import { PdfDrawer } from '@/components/PdfDrawer';
 import { WeeklyReflection } from '@/components/WeeklyReflection';
+import { InstallPrompt } from '@/components/InstallPrompt';
 import { getOverallProgress } from '@/lib/store';
 
 const Index = () => {
@@ -74,6 +75,7 @@ const Index = () => {
       <footer className="text-center py-6 text-xs text-muted-foreground font-mono">
         No fake hours. No fake progress. Only proof of work.
       </footer>
+      <InstallPrompt />
     </div>
   );
 };

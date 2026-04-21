@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Lock, CheckCircle2, AlertCircle, Github, Link2, FileText, Code2 } from 'lucide-react';
+import { Target, Lock, CheckCircle2, AlertCircle, GitBranch as Github, Link2, FileText, Code2 } from 'lucide-react';
 import { getTodayChallenge, addSubmission, getTodaySubmissions, type DailySubmission } from '@/lib/store';
 import { toast } from 'sonner';
 

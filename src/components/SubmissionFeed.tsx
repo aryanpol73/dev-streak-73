@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
-import { ShieldCheck, ShieldAlert, Github, Link2, FileText, Code2, Clock } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Code2 as Code2 as Github, Link2, FileText, Code2, Clock } from 'lucide-react';
 import { getSubmissions } from '@/lib/store';
 
-const ICONS = { commit: Github, deploy: Link2, leetcode: Code2, notes: FileText };
+const ICONS = { commit: Code2 as Github, deploy: Link2, leetcode: Code2, notes: FileText };
 
 export function SubmissionFeed({ refreshKey }: { refreshKey: number }) {
   const subs = useMemo(() => getSubmissions().slice(-15).reverse(), [refreshKey]);

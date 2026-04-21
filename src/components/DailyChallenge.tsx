@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Target, Lock, CheckCircle2, AlertCircle, Github, Link2, FileText, Code2 } from 'lucide-react';
+import { Target, Lock, CheckCircle2, AlertCircle, Code2 as Code2 as Github, Link2, FileText, Code2 } from 'lucide-react';
 import { getTodayChallenge, addSubmission, getTodaySubmissions, type DailySubmission } from '@/lib/store';
 import { toast } from 'sonner';
 
@@ -96,7 +96,7 @@ export function DailyChallenge({ onSubmit }: Props) {
             <label className="text-xs text-muted-foreground mb-2 block uppercase tracking-wider">Proof Type</label>
             <div className="grid grid-cols-4 gap-2">
               {([
-                { v: 'commit', icon: Github, label: 'Commit' },
+                { v: 'commit', icon: Code2 as Github, label: 'Commit' },
                 { v: 'deploy', icon: Link2, label: 'Deploy' },
                 { v: 'leetcode', icon: Code2, label: 'LeetCode' },
                 { v: 'notes', icon: FileText, label: 'Notes' },

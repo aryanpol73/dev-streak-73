@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
-import { ShieldCheck, ShieldAlert, Github, Link2, FileText, Code2, Clock } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, GitBranch as Github, Link2, FileText, Code2, Clock } from 'lucide-react';
 import { getSubmissions } from '@/lib/store';
 
 const ICONS = { commit: Github, deploy: Link2, leetcode: Code2, notes: FileText };

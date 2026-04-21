@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, CheckCircle2, Circle, Rocket, ExternalLink, Github } from 'lucide-react';
+import { ChevronDown, CheckCircle2, Circle, Rocket, ExternalLink, GitBranch as Github } from 'lucide-react';
 import { getPhases, toggleTopic, updateProject, getPhaseProgress } from '@/lib/store';
 import { toast } from 'sonner';
 

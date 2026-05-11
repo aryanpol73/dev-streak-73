@@ -14,7 +14,135 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      reflections: {
+        Row: {
+          content: string
+          id: string
+          score: number | null
+          updated_at: string
+          user_id: string
+          week_iso: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          score?: number | null
+          updated_at?: string
+          user_id: string
+          week_iso: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          score?: number | null
+          updated_at?: string
+          user_id?: string
+          week_iso?: string
+        }
+        Relationships: []
+      }
+      roadmap_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          phase_id: string
+          topic_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          phase_id: string
+          topic_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          phase_id?: string
+          topic_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          attachments: Json | null
+          challenge_id: string
+          challenge_name: string
+          created_at: string
+          date: string
+          difficulty: string | null
+          id: string
+          leetcode_problems: number | null
+          minutes_studied: number
+          phase_number: number
+          proof_notes: string | null
+          proof_type: string
+          proof_url: string | null
+          updated_at: string
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          attachments?: Json | null
+          challenge_id: string
+          challenge_name: string
+          created_at?: string
+          date: string
+          difficulty?: string | null
+          id?: string
+          leetcode_problems?: number | null
+          minutes_studied?: number
+          phase_number: number
+          proof_notes?: string | null
+          proof_type: string
+          proof_url?: string | null
+          updated_at?: string
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          attachments?: Json | null
+          challenge_id?: string
+          challenge_name?: string
+          created_at?: string
+          date?: string
+          difficulty?: string | null
+          id?: string
+          leetcode_problems?: number | null
+          minutes_studied?: number
+          phase_number?: number
+          proof_notes?: string | null
+          proof_type?: string
+          proof_url?: string | null
+          updated_at?: string
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      widget_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          public_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          public_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          public_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

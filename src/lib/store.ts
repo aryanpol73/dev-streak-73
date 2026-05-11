@@ -420,7 +420,10 @@ function load<T>(key: string, fallback: T): T {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
   catch { return fallback; }
 }
-function save(key: string, data: unknown) { localStorage.setItem(key, JSON.stringify(data)); }
+function save(key: string, data: unknown) {
+  localStorage.setItem(key, JSON.stringify(data));
+  try { window.dispatchEvent(new CustomEvent('devstreak:changed', { detail: { key } })); } catch {}
+}
 
 // =============================================================================
 // PHASES

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Activity } from 'lucide-react';
+import { Activity, LogOut } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { DailyChallenge } from '@/components/DailyChallenge';
 import { ActivityHeatmap } from '@/components/ActivityHeatmap';
@@ -11,6 +11,8 @@ import { AlignmentCard } from '@/components/AlignmentCard';
 import { PdfDrawer } from '@/components/PdfDrawer';
 import { WeeklyReflection } from '@/components/WeeklyReflection';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { WidgetShare } from '@/components/WidgetShare';
+import { signOut } from '@/lib/identity';
 import { getOverallProgress } from '@/lib/store';
 
 const Index = () => {
@@ -32,7 +34,12 @@ const Index = () => {
             <span className="text-xs text-muted-foreground hidden sm:inline">
               Roadmap: <span className="text-primary font-mono font-semibold">{overall}%</span>
             </span>
+            <WidgetShare />
             <PdfDrawer />
+            <button onClick={() => signOut()} title="Lock"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted/40 transition">
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>

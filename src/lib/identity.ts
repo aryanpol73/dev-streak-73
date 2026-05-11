@@ -1,4 +1,4 @@
-import { generateMnemonic, validateMnemonic, mnemonicToSeedSync } from 'bip39';
+import { generateMnemonic, validateMnemonic } from 'bip39';
 import { supabase } from '@/integrations/supabase/client';
 
 const PEPPER = 'devstreak-v1-pepper-2026';
@@ -11,9 +11,12 @@ async function sha256Hex(input: string): Promise<string> {
 export interface DerivedCreds { email: string; password: string; }
 
 export async function deriveCreds(phrase: string): Promise<DerivedCreds> {
-  const seed = mnemonicToSeedSync(phrase.trim().toLowerCase()).toString('hex');
-  const emailHash = (await sha256Hex(seed + ':email')).slice(0, 24);
-  const password = await sha256Hex(seed + ':' + PEPPER + ':password');
+  const norm = phrase.trim().toLowerCase().split(/\s+/).join(' ');
+  // PBKDF2-style stretching via repeated SHA-256 (4096 rounds) — keeps it in WebCrypto only
+  let h = await sha256Hex(norm + ':' + PEPPER);
+  for (let i = 0; i < 4096; i++) h = await sha256Hex(h + ':' + i);
+  const emailHash = (await sha256Hex(h + ':email')).slice(0, 24);
+  const password = await sha256Hex(h + ':password');
   return { email: `id-${emailHash}@devstreak.app`, password };
 }
 

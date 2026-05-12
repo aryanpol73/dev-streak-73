@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Widget from "./pages/Widget.tsx";
-import { IdentityGate } from "./components/IdentityGate";
+import { ConstellationGate } from "./components/ConstellationGate";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +18,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/w/:publicId" element={<Widget />} />
-          <Route path="/" element={<IdentityGate><Index /></IdentityGate>} />
+          <Route path="/" element={<ConstellationGate><Index /></ConstellationGate>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
